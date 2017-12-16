@@ -22,6 +22,10 @@ defmodule Aecore.Peers.Worker do
 
   ## Client side
 
+  def send_to_peer(uri, data, peer) do
+    HttpClient.post(peer, data, uri)
+  end
+
   @spec add_peer(term) :: :ok | {:error, term()} | :error
   def add_peer(uri) do
     GenServer.call(__MODULE__, {:add_peer, uri}, 10000)
@@ -76,7 +80,7 @@ def handle_call({:add_peer,uri}, _from, %{peers: peers, nonce: own_nonce} = stat
     case(Client.get_info(uri)) do
       {:ok, info} ->
         case own_nonce == info.peer_nonce do
-          false ->  
+          false ->
             if(info.genesis_block_hash == genesis_block_header_hash()) do
               updated_peers = Map.put(peers, uri, info.current_block_hash)
               Logger.info(fn -> "Added #{uri} to the peer list" end)
@@ -86,7 +90,7 @@ def handle_call({:add_peer,uri}, _from, %{peers: peers, nonce: own_nonce} = stat
                 "Failed to add #{uri}, genesis header hash not valid" end)
               {:reply, {:error, "Genesis header hash not valid"}, %{state | peers: peers}}
             end
-          true -> 
+          true ->
             Logger.debug(fn ->
               "Failed to add #{uri}, equal peer nonces" end)
             {:reply, {:error, "Equal peer nonces"}, %{state | peers: peers}}

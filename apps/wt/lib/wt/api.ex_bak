@@ -1,0 +1,42 @@
+defmodule API do
+  use Maru.Router
+  plug Plug.Logger
+
+  get do
+	conn |> text("default get works")
+  end
+
+  ## curl -XPOST -H "Content-type: application/json" 'localhost:8800/resume'
+  post "resume" do
+	resp = ElManager.resume()
+	json(conn, %{response: resp})
+  end
+
+  ## curl -XPOST -H "Content-type: application/json" 'localhost:8800/stop'
+  post "stop" do
+	resp = ElManager.stop()
+	json(conn, %{response: resp})
+  end
+
+  ## curl -XPOST -H "Content-type: application/json" 'localhost:8800/current_tokens'
+  post "current_tokens" do
+	resp = ElManager.current_tokens()
+	json(conn, %{response: resp})
+  end
+
+  ## curl -XPOST -H "Content-type: application/json" 'localhost:8800/get_state'
+  post "get_state" do
+	resp = ElManager.get_state()
+	json(conn, %{response: resp})
+  end
+
+  ## curl -XPOST -H "Content-type: application/json" -d '{"tokens": "50.0"}' 'localhost:8800/pay'
+  post "pay" do
+	{:ok, body, _conn1} = read_body(conn, length: 5, read_length: 5)
+	{:ok, json}  = JSON.decode(body)
+	tokens = String.to_float(json["tokens"])
+	resp = ElManager.pay(tokens)
+	json(conn, %{response: resp})
+  end
+
+end

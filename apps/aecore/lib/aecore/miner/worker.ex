@@ -74,6 +74,9 @@ defmodule Aecore.Miner.Worker do
 
   ## Running ##
   def running(:cast, :mine, start_nonce) do
+    IO.inspect("start_nonce : #{inspect(start_nonce)}")
+    IO.inspect("mine_next_block : #{inspect(mine_next_block(start_nonce))}")
+
     {_, next_nonce} = mine_next_block(start_nonce)
     GenStateMachine.cast(__MODULE__, :mine)
     {:next_state, :running, next_nonce}
@@ -181,7 +184,7 @@ defmodule Aecore.Miner.Worker do
     catch
       {:error, _message} ->
         Logger.error(fn ->
-          "Failed to mine block"
+          "Failed to mine block : #{inspect(_message)}"
         end)
     end
   end
